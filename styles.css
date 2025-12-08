@@ -1,68 +1,44 @@
 
 body {
-  font-family: Arial;
-  background: #faf7f2;
-  margin: 0;
-  padding: 20px;
+    background: #e9f2ff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+    padding: 20px;
 }
 
-#app {
-  max-width: 450px;
-  margin: auto;
-  padding: 20px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+.container {
+    max-width: 420px;
+    margin: auto;
 }
 
-.title {
-  text-align: center;
-  font-size: 26px;
-  margin-bottom: 20px;
-  color: #6a4e3c;
+.greeting {
+    text-align: center;
+    color: #003d8f;
+    margin-bottom: 30px;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
-.menu-btn {
-  width: 100%;
-  padding: 16px;
-  margin-bottom: 15px;
-  font-size: 18px;
-  background: #a8876c;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+.main-btn {
+    width: 100%;
+    padding: 22px;
+    margin-bottom: 18px;
+    font-size: 20px;
+    border: none;
+    border-radius: 14px;
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  margin-bottom: 10px;
+.main-btn:active {
+    background: #2563eb;
 }
 
-.chat-log {
-  height: 300px;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 10px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-}
-
-.input-box {
-  display: flex;
-  gap: 10px;
-}
-
-input {
-  flex: 1;
-  padding: 12px;
-  font-size: 16px;
-}
-
-button {
-  padding: 12px 16px;
-  font-size: 16px;
+.screen-box {
+    padding: 20px;
+    background: white;
+    border-radius: 14px;
+    margin-top: 20px;
 }
