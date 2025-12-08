@@ -44,7 +44,7 @@ function finish(msg) {
     const screen = document.getElementById('screen');
     screen.innerHTML = `
         <div class="screen-box">
-            <h3>기록 완료 <span style="color:#2563eb; font-size:28px;">✔</span></h3>
+            <h3>기록 완료 <span style="color:#22C55E; font-size:28px;">✔</span></h3>
             <p style="font-size:24px; margin-top:10px;">${msg}</p>
             <button class='main-btn' onclick='location.reload()'>홈으로 돌아가기</button>
         </div>`;
