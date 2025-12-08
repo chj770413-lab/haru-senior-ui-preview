@@ -33,12 +33,13 @@ function goPage(type) {
     if (type === 'ai') {
         screen.innerHTML = `
             <div class="screen-box">
-                <h3>하루동행 건강 도우미</h3>
+                <h3>🧑‍⚕️ 하루동행 건강 도우미</h3>
                 <p>조금만 기다려주세요 💙<br>
                 하루동행이 더 안전한 건강 상담 기능을 준비하고 있어요.</p>
             </div>`;
     }
 }
+
 
 function finish(msg) {
     const screen = document.getElementById('screen');
@@ -49,4 +50,3 @@ function finish(msg) {
             <button class='main-btn' onclick='location.reload()'>홈으로 돌아가기</button>
         </div>`;
 }
-
