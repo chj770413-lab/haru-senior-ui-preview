@@ -1,28 +1,110 @@
-.container{
-    max-width:360px;
-    margin:auto;
-    text-align:center;
-    font-family:sans-serif;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background-color: #f3f4ff;
 }
 
-.main-btn{
-    display:block;
-    width:90%;
-    margin:10px auto;
-    padding:14px;
-    font-size:20px;
-    border:none;
-    border-radius:12px;
-    background:#3B82F6;
-    color:white;
+.container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 32px 16px 40px;
+  text-align: center;
 }
 
-.section{
-    display:none;
+.title {
+  margin: 0 0 24px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
 }
 
-.icon{
-    width:28px;
-    vertical-align:middle;
-    margin-right:8px;
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.main-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: none;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
+}
+
+.main-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.screen {
+  margin-top: 12px;
+}
+
+.screen-box {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 18px 16px 20px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
+  text-align: left;
+}
+
+.screen-box h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.screen-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sub-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: none;
+  background-color: #eff6ff;
+  color: #1f2933;
+  font-size: 17px;
+  text-align: center;
+}
+
+.sub-btn:active {
+  background-color: #dbeafe;
+}
+
+.check-message {
+  font-size: 18px;
+  margin-top: 6px;
+}
+
+.check-mark {
+  color: #22c55e;
+  font-size: 28px;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    margin-top: 40px;
+  }
 }
