@@ -2,28 +2,67 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>하루동행 시니어 UI</title>
 <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 <div id="screen" class="container">
-    <h2>하루동행</h2>
 
-    <button class="main-btn" onclick="goPage('med')">
-        <img src="img/capsule.svg" class="icon"> 복약 체크하기
-    </button>
+    <div id="home">
+        <h2>하루동행</h2>
 
-    <button class="main-btn" onclick="goPage('mood')">
-        <img src="img/smile.svg" class="icon"> 오늘 기분 기록하기
-    </button>
+        <button class="main-btn" onclick="show('med')">
+            <img src="img/capsule.svg" class="icon"> 복약 체크하기
+        </button>
 
-    <button class="main-btn" onclick="goPage('health')">
-        <img src="img/heart.svg" class="icon"> 건강 상태 기록하기
-    </button>
+        <button class="main-btn" onclick="show('mood')">
+            <img src="img/smile.svg" class="icon"> 오늘 기분 기록하기
+        </button>
 
-    <button class="main-btn" onclick="goPage('ai')">
-        <img src="img/stethoscope.svg" class="icon"> 하루동행 건강 도우미
-    </button>
+        <button class="main-btn" onclick="show('health')">
+            <img src="img/heart.svg" class="icon"> 건강 상태 기록하기
+        </button>
+
+        <button class="main-btn" onclick="show('ai')">
+            <img src="img/stethoscope.svg" class="icon"> 하루동행 건강 도우미
+        </button>
+    </div>
+
+    <div id="med" class="section">
+        <h3>복약 체크하기</h3>
+        <button class='main-btn' onclick='finish("아침 복약 완료")'>아침 복약</button>
+        <button class='main-btn' onclick='finish("저녁 복약 완료")'>저녁 복약</button>
+    </div>
+
+    <div id="mood" class="section">
+        <h3>오늘 기분은?</h3>
+        <button class='main-btn' onclick='finish("오늘 기분: 좋음")'>🙂 좋음</button>
+        <button class='main-btn' onclick='finish("오늘 기분: 보통")'>😐 보통</button>
+        <button class='main-btn' onclick='finish("오늘 기분: 나쁨")'>🙁 나쁨</button>
+    </div>
+
+    <div id="health" class="section">
+        <h3>건강 상태 기록하기</h3>
+        <button class='main-btn' onclick='finish("상태: 양호")'>양호</button>
+        <button class='main-btn' onclick='finish("상태: 주의 필요")'>주의 필요</button>
+        <button class='main-btn' onclick='finish("상태: 좋지 않음")'>좋지 않음</button>
+    </div>
+
+    <div id="ai" class="section">
+        <h3><img src="img/stethoscope.svg" class="icon"> 하루동행 건강 도우미</h3>
+        <p>조금만 기다려주세요 💙<br>
+        더 안전한 건강 상담 기능을 준비하고 있어요.</p>
+        <button class='main-btn' onclick="goHome()">홈으로 돌아가기</button>
+    </div>
+
+    <div id="finish-box" class="section">
+        <h3>기록 완료 <img src="img/check-green.svg" class="icon"></h3>
+        <p id="finish-msg"></p>
+        <button class='main-btn' onclick='goHome()'>홈으로 돌아가기</button>
+    </div>
+
 </div>
 
 <script src="ui.js"></script>
