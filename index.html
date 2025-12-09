@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>하루동행 시니어 UI</title>
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="screen" class="container">
+    <h2>하루동행</h2>
 
-<div class="container">
-    <h2 class="greeting">좋은 아침이에요 😊<br>오늘 건강을 함께 기록해볼까요?</h2>
+    <button class="main-btn" onclick="goPage('med')">
+        <img src="img/capsule.svg" class="icon"> 복약 체크하기
+    </button>
 
-    <button class="main-btn" onclick="goPage('med')">💊 복약 체크하기</button>
-    <button class="main-btn" onclick="goPage('mood')">🙂 오늘 기분 기록하기</button>
-    <button class="main-btn" onclick="goPage('health')">🩺 건강 상태 기록하기</button>
-    <button class="main-btn" onclick="goPage('ai')">🧑‍⚕️ 하루동행 건강 도우미</button>
+    <button class="main-btn" onclick="goPage('mood')">
+        <img src="img/smile.svg" class="icon"> 오늘 기분 기록하기
+    </button>
 
+    <button class="main-btn" onclick="goPage('health')">
+        <img src="img/heart.svg" class="icon"> 건강 상태 기록하기
+    </button>
 
-    <div id="screen"></div>
+    <button class="main-btn" onclick="goPage('ai')">
+        <img src="img/stethoscope.svg" class="icon"> 하루동행 건강 도우미
+    </button>
 </div>
 
 <script src="ui.js"></script>
