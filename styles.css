@@ -13,98 +13,84 @@ body {
 }
 
 .title {
-  margin: 0 0 24px;
-  font-size: 28px;
+  margin: 0 0 28px;
+  font-size: 30px;
   font-weight: 700;
-  color: #000;
 }
 
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .main-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 14px 16px;
+  height: 80px;               /* 시니어 대형 버튼 */
   border-radius: 18px;
   border: none;
-  background-color: #3b82f6;
+  background-color: #3b82f6;  /* 전체 파란색 통일 */
   color: #ffffff;
-  font-size: 18px;
+  font-size: 24px;            /* 글씨 크게 */
   font-weight: 600;
   box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
 }
 
 .main-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
 }
 
 .screen {
-  margin-top: 12px;
+  margin-top: 20px;
 }
 
 .screen-box {
   background-color: #ffffff;
   border-radius: 16px;
-  padding: 18px 16px 20px;
+  padding: 20px 16px 24px;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
   text-align: left;
 }
 
 .screen-box h3 {
-  margin: 0 0 12px;
-  font-size: 20px;
+  margin: 0 0 14px;
+  font-size: 22px;
 }
 
 .screen-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
 }
 
 .sub-btn {
   width: 100%;
+  height: 70px;               /* 내부 버튼도 크게 */
   padding: 12px 14px;
   border-radius: 14px;
   border: none;
-  background-color: #eff6ff;
-  color: #1f2933;
-  font-size: 17px;
-  text-align: center;
-}
-
-.sub-btn:active {
-  background-color: #dbeafe;
+  background-color: #3b82f6;  /* 전체 파란색 통일 */
+  color: white;
+  font-size: 22px;
 }
 
 .check-message {
-  font-size: 18px;
-  margin-top: 6px;
+  font-size: 22px;
+  margin-top: 10px;
 }
 
-.check-mark {
-  color: #22c55e;
-  font-size: 28px;
+.check-icon {
+  width: 34px;
+  height: 34px;
   vertical-align: middle;
-  margin-left: 4px;
-}
-
-@media (min-width: 768px) {
-  .container {
-    margin-top: 40px;
-  }
+  margin-left: 6px;
 }
