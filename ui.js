@@ -1,3 +1,31 @@
+/* ------------------------------
+   공통: 음성 입력(STT) + 음성 출력(TTS)
+------------------------------ */
+
+/* 음성 → 텍스트 (입력창에 자동 입력) */
+function startSTT(targetInputId) {
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = "ko-KR";
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    document.getElementById(targetInputId).value = text;
+  };
+
+  recognition.start();
+}
+
+/* 텍스트 → 음성 (AI 답변 읽어주기) */
+function speak(text) {
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "ko-KR";
+  speechSynthesis.speak(msg);
+}
+
+/* ------------------------------
+   기본 UI 기능
+------------------------------ */
+
 function clearScreen() {
   document.getElementById("screen").innerHTML = "";
 }
@@ -5,6 +33,7 @@ function clearScreen() {
 function show(type) {
   const screen = document.getElementById("screen");
 
+  /* ----- 복약 체크 ----- */
   if (type === "med") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -17,6 +46,7 @@ function show(type) {
     `;
   }
 
+  /* ----- 기분 기록 ----- */
   if (type === "mood") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -30,6 +60,7 @@ function show(type) {
     `;
   }
 
+  /* ----- 건강 상태 ----- */
   if (type === "health") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -43,15 +74,37 @@ function show(type) {
     `;
   }
 
+  /* ------------------------------
+     AI 건강 도우미 (STT + 입력창 + TTS)
+  ------------------------------ */
   if (type === "ai") {
     screen.innerHTML = `
       <div class="screen-box">
         <h3>하루동행 건강 도우미</h3>
-        <p>조금만 기다려 주세요 💙<br />더 안전한 건강 상담을 준비하고 있어요.</p>
+
+        <textarea 
+          id="aiInput" 
+          class="input-area" 
+          placeholder="말하기 버튼을 누르고 말씀해주세요."
+          style="width: 100%; height: 80px; margin-top: 8px; font-size: 16px;">
+        </textarea>
+
+        <div class="screen-buttons" style="margin-top:12px;">
+          <button class="sub-btn" onclick="startSTT('aiInput')">🎤 말하기</button>
+          <button class="sub-btn" onclick="sendToAI()">AI에게 보내기</button>
+        </div>
+
+        <div id="aiResponse" class="ai-response-box" 
+             style="margin-top:14px; font-size:17px; line-height:1.4;">
+        </div>
       </div>
     `;
   }
 }
+
+/* ------------------------------
+   기록 완료 화면
+------------------------------ */
 
 function finish(msg) {
   const screen = document.getElementById("screen");
@@ -68,4 +121,36 @@ function finish(msg) {
   setTimeout(() => {
     clearScreen();
   }, 1500);
+}
+
+/* ------------------------------
+   AI 호출 + 답변 음성 읽기
+   (대표님의 Vercel API URL로 자동 교체할 예정)
+------------------------------ */
+
+async function sendToAI() {
+  const text = document.getElementById("aiInput").value.trim();
+  if (!text) return;
+
+  const resBox = document.getElementById("aiResponse");
+  resBox.innerHTML = "⏳ 답변을 불러오는 중입니다...";
+
+  try {
+    const response = await fetch("YOUR_API_URL_HERE", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+
+    const data = await response.json();
+
+    const reply = data.reply || "죄송해요, 잠시 다시 말씀해주실 수 있을까요?";
+    resBox.innerHTML = reply;
+
+    // ⭐ AI 답변 음성으로 읽기
+    speak(reply);
+
+  } catch (err) {
+    resBox.innerHTML = "⚠️ 연결 오류가 발생했어요. 잠시 후 다시 시도해주세요.";
+  }
 }
