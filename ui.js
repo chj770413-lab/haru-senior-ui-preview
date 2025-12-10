@@ -47,51 +47,59 @@ async function startWhisperFallback(targetInputId) {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream, {
-  mimeType: "audio/ogg; codecs=opus"
-});
 
+    // 안드로이드 호환 mimeType 자동 감지
+    let options = { mimeType: "audio/webm; codecs=opus" };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      options = { mimeType: "audio/webm" };
+    }
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      options = {};
+    }
+
+    const mediaRecorder = new MediaRecorder(stream, options);
     let chunks = [];
 
     alert("🎤 말을 시작하세요. 6초 후 자동으로 멈춥니다.");
 
-    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
 
     mediaRecorder.onstop = async () => {
-  const audioBlob = new Blob(chunks, {
-    type: "audio/ogg; codecs=opus"   // ← webm 대신 ogg로 변경
-  });
+      const audioBlob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
 
-  if (audioBlob.size < 500) {  
-    alert("녹음 데이터가 비어 있습니다. 다시 시도해주세요.");
-    return;
-  }
+      if (audioBlob.size < 500) {
+        alert("녹음 데이터가 비어 있습니다. 다시 시도해주세요.");
+        return;
+      }
 
-  const formData = new FormData();
-  formData.append("audio", audioBlob, "audio.ogg");
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "audio.webm");
 
-  try {
-    const response = await fetch(WHISPER_API_URL, {
-      method: "POST",
-      body: formData,
-    });
+      try {
+        const response = await fetch(WHISPER_API_URL, {
+          method: "POST",
+          body: formData,
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (data.text) inputBox.value = data.text;
-    else alert("음성 인식이 어려워요. 다시 시도해주세요!");
-  } catch (err) {
-    alert("Whisper 통신 오류가 발생했습니다.");
-  }
-};
-
+        if (data.text) inputBox.value = data.text;
+        else alert("음성 인식이 어려워요. 다시 시도해주세요!");
+      } catch (err) {
+        alert("Whisper 통신 오류가 발생했습니다.");
+      }
+    };
 
     mediaRecorder.start();
     setTimeout(() => mediaRecorder.stop(), 6000);
+
   } catch (err) {
     alert("마이크 접근이 불가합니다. 권한을 확인해주세요.");
   }
 }
+
 
 /* -----------------------------------------------------------
    3) TTS (텍스트 → 음성)
