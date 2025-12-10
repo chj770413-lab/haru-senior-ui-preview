@@ -3,7 +3,8 @@
 ------------------------------------------------- */
 
 // Whisper API URL (대표님이 사용 중인 Vercel Proxy로 교체)
-const WHISPER_API_URL = "YOUR_WHISPER_API_URL_HERE";
+const WHISPER_API_URL = "https://harudonghaeng-ai-proxy.vercel.app/api/whisper
+";
 
 /* 음성 → 텍스트 최종 함수 */
 async function startSmartSTT(targetInputId) {
@@ -198,7 +199,7 @@ async function sendToAI() {
   resBox.innerHTML = "⏳ 답변을 불러오는 중입니다...";
 
   try {
-    const response = await fetch("YOUR_AI_API_URL_HERE", {
+    const response = await fetch("https://haru-ai-proxy.vercel.app/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text }),
