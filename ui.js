@@ -55,25 +55,33 @@ async function startWhisperFallback(targetInputId) {
     mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
     mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(chunks, { type: "audio/webm" });
+  const audioBlob = new Blob(chunks, {
+    type: "audio/ogg; codecs=opus"   // ← webm 대신 ogg로 변경
+  });
 
-      const formData = new FormData();
-      formData.append("audio", audioBlob);
+  if (audioBlob.size < 500) {  
+    alert("녹음 데이터가 비어 있습니다. 다시 시도해주세요.");
+    return;
+  }
 
-      try {
-        const response = await fetch(WHISPER_API_URL, {
-          method: "POST",
-          body: formData,
-        });
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "audio.ogg");
 
-        const data = await response.json();
+  try {
+    const response = await fetch(WHISPER_API_URL, {
+      method: "POST",
+      body: formData,
+    });
 
-        if (data.text) inputBox.value = data.text;
-        else alert("음성 인식이 어려워요. 다시 시도해주세요!");
-      } catch (err) {
-        alert("Whisper 인식 오류가 발생했습니다.");
-      }
-    };
+    const data = await response.json();
+
+    if (data.text) inputBox.value = data.text;
+    else alert("음성 인식이 어려워요. 다시 시도해주세요!");
+  } catch (err) {
+    alert("Whisper 통신 오류가 발생했습니다.");
+  }
+};
+
 
     mediaRecorder.start();
     setTimeout(() => mediaRecorder.stop(), 6000);
