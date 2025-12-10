@@ -48,11 +48,8 @@ async function startWhisperFallback(targetInputId) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    // 안드로이드 호환 mimeType 자동 감지
-    let options = { mimeType: "audio/webm; codecs=opus" };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-      options = { mimeType: "audio/webm" };
-    }
+    // Android 100% 호환되는 mp4/aac 설정
+    let options = { mimeType: "audio/mp4" };
     if (!MediaRecorder.isTypeSupported(options.mimeType)) {
       options = {};
     }
@@ -67,15 +64,15 @@ async function startWhisperFallback(targetInputId) {
     };
 
     mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
+      const audioBlob = new Blob(chunks, { type: "audio/mp4" });
 
       if (audioBlob.size < 500) {
-        alert("녹음 데이터가 비어 있습니다. 다시 시도해주세요.");
+        alert("녹음이 비어 있어요. 다시 시도해주세요.");
         return;
       }
 
       const formData = new FormData();
-      formData.append("audio", audioBlob, "audio.webm");
+      formData.append("audio", audioBlob, "audio.mp4");
 
       try {
         const response = await fetch(WHISPER_API_URL, {
@@ -86,17 +83,17 @@ async function startWhisperFallback(targetInputId) {
         const data = await response.json();
 
         if (data.text) inputBox.value = data.text;
-        else alert("음성 인식이 어려워요. 다시 시도해주세요!");
+        else alert("음성 인식 실패. 다시 시도해주세요!");
       } catch (err) {
-        alert("Whisper 통신 오류가 발생했습니다.");
+        alert("Whisper 서버 통신 오류입니다.");
       }
     };
 
     mediaRecorder.start();
     setTimeout(() => mediaRecorder.stop(), 6000);
-
+    
   } catch (err) {
-    alert("마이크 접근이 불가합니다. 권한을 확인해주세요.");
+    alert("마이크 접근 오류입니다. 권한을 다시 확인해주세요.");
   }
 }
 
