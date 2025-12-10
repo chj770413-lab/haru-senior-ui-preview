@@ -47,7 +47,10 @@ async function startWhisperFallback(targetInputId) {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
+    const mediaRecorder = new MediaRecorder(stream, {
+  mimeType: "audio/ogg; codecs=opus"
+});
+
     let chunks = [];
 
     alert("🎤 말을 시작하세요. 6초 후 자동으로 멈춥니다.");
