@@ -1,30 +1,107 @@
-/* ------------------------------
-   공통: 음성 입력(STT) + 음성 출력(TTS)
------------------------------- */
+/* -----------------------------------------------
+   1) 기기별 자동 음성 인식 엔진 선택
+------------------------------------------------- */
 
-/* 음성 → 텍스트 (입력창에 자동 입력) */
-function startSTT(targetInputId) {
-  const recognition = new webkitSpeechRecognition();
-  recognition.lang = "ko-KR";
+// Whisper API URL (대표님이 사용 중인 Vercel Proxy로 교체)
+const WHISPER_API_URL = "YOUR_WHISPER_API_URL_HERE";
 
-  recognition.onresult = (event) => {
-    const text = event.results[0][0].transcript;
-    document.getElementById(targetInputId).value = text;
-  };
+/* 음성 → 텍스트 최종 함수 */
+async function startSmartSTT(targetInputId) {
+  const inputBox = document.getElementById(targetInputId);
 
-  recognition.start();
+  // 1단계: 웹 기본 STT 존재 확인
+  window.SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (window.SpeechRecognition) {
+    try {
+      const recognition = new window.SpeechRecognition();
+      recognition.lang = "ko-KR";
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        inputBox.value = text;
+      };
+
+      recognition.onerror = () => {
+        // 웹 STT 실패 → Whisper로 자동전환
+        startWhisperFallback(targetInputId);
+      };
+
+      recognition.start();
+      return;
+    } catch (e) {
+      console.log("웹 STT 오류 → Whisper로 전환");
+    }
+  }
+
+  // 2단계: 웹 STT 없음 → 바로 Whisper 전환
+  startWhisperFallback(targetInputId);
 }
 
-/* 텍스트 → 음성 (AI 답변 읽어주기) */
+/* -----------------------------------------------
+   2) Whisper 백업 음성 인식(100% 지원)
+------------------------------------------------- */
+
+async function startWhisperFallback(targetInputId) {
+  const inputBox = document.getElementById(targetInputId);
+
+  // 마이크 스트림 얻기
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    let chunks = [];
+
+    alert("🎤 말을 시작하세요. 멈추려면 다시 버튼을 눌러주세요.");
+
+    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(chunks, { type: "audio/webm" });
+
+      const formData = new FormData();
+      formData.append("audio", audioBlob);
+
+      try {
+        const response = await fetch(WHISPER_API_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.text) {
+          inputBox.value = data.text;
+        } else {
+          alert("음성 인식이 어려워요. 다시 시도해주세요!");
+        }
+      } catch (err) {
+        alert("Whisper 인식 오류가 발생했습니다.");
+      }
+    };
+
+    mediaRecorder.start();
+
+    // Whisper 녹음을 6초만 허용(너무 길면 시니어 사용 불편)
+    setTimeout(() => mediaRecorder.stop(), 6000);
+
+  } catch (err) {
+    alert("마이크 접근이 불가능합니다.");
+  }
+}
+
+/* -----------------------------------------------
+   3) 텍스트 → 음성 (TTS)
+------------------------------------------------- */
 function speak(text) {
   const msg = new SpeechSynthesisUtterance(text);
   msg.lang = "ko-KR";
   speechSynthesis.speak(msg);
 }
 
-/* ------------------------------
-   기본 UI 기능
------------------------------- */
+/* -----------------------------------------------
+   4) 화면 전환 + 시니어 UI 기능
+------------------------------------------------- */
 
 function clearScreen() {
   document.getElementById("screen").innerHTML = "";
@@ -33,7 +110,6 @@ function clearScreen() {
 function show(type) {
   const screen = document.getElementById("screen");
 
-  /* ----- 복약 체크 ----- */
   if (type === "med") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -46,7 +122,6 @@ function show(type) {
     `;
   }
 
-  /* ----- 기분 기록 ----- */
   if (type === "mood") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -60,7 +135,6 @@ function show(type) {
     `;
   }
 
-  /* ----- 건강 상태 ----- */
   if (type === "health") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -74,9 +148,6 @@ function show(type) {
     `;
   }
 
-  /* ------------------------------
-     AI 건강 도우미 (STT + 입력창 + TTS)
-  ------------------------------ */
   if (type === "ai") {
     screen.innerHTML = `
       <div class="screen-box">
@@ -90,7 +161,7 @@ function show(type) {
         </textarea>
 
         <div class="screen-buttons" style="margin-top:12px;">
-          <button class="sub-btn" onclick="startSTT('aiInput')">🎤 말하기</button>
+          <button class="sub-btn" onclick="startSmartSTT('aiInput')">🎤 말하기</button>
           <button class="sub-btn" onclick="sendToAI()">AI에게 보내기</button>
         </div>
 
@@ -101,10 +172,6 @@ function show(type) {
     `;
   }
 }
-
-/* ------------------------------
-   기록 완료 화면
------------------------------- */
 
 function finish(msg) {
   const screen = document.getElementById("screen");
@@ -117,17 +184,12 @@ function finish(msg) {
       <p class="check-message">${msg}</p>
     </div>
   `;
-
-  setTimeout(() => {
-    clearScreen();
-  }, 1500);
+  setTimeout(() => clearScreen(), 1500);
 }
 
-/* ------------------------------
-   AI 호출 + 답변 음성 읽기
-   (대표님의 Vercel API URL로 자동 교체할 예정)
------------------------------- */
-
+/* -----------------------------------------------
+   5) AI 응답 처리
+------------------------------------------------- */
 async function sendToAI() {
   const text = document.getElementById("aiInput").value.trim();
   if (!text) return;
@@ -136,21 +198,13 @@ async function sendToAI() {
   resBox.innerHTML = "⏳ 답변을 불러오는 중입니다...";
 
   try {
-    const response = await fetch("YOUR_API_URL_HERE", {
+    const response = await fetch("YOUR_AI_API_URL_HERE", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text }),
     });
 
     const data = await response.json();
+    const reply = data.reply || "잠시 후 다시 말씀해주세요.";
 
-    const reply = data.reply || "죄송해요, 잠시 다시 말씀해주실 수 있을까요?";
-    resBox.innerHTML = reply;
-
-    // ⭐ AI 답변 음성으로 읽기
-    speak(reply);
-
-  } catch (err) {
-    resBox.innerHTML = "⚠️ 연결 오류가 발생했어요. 잠시 후 다시 시도해주세요.";
-  }
-}
+    resBox.inner
