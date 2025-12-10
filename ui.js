@@ -47,54 +47,100 @@ async function startWhisperFallback(targetInputId) {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(stream);
+    const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
-    // Android 100% 호환되는 mp4/aac 설정
-    let options = { mimeType: "audio/mp4" };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-      options = {};
-    }
+    let pcmData = [];
 
-    const mediaRecorder = new MediaRecorder(stream, options);
-    let chunks = [];
+    alert("🎤 말씀하세요. 6초 후 자동 종료됩니다.");
 
-    alert("🎤 말을 시작하세요. 6초 후 자동으로 멈춥니다.");
+    source.connect(processor);
+    processor.connect(audioContext.destination);
 
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunks.push(e.data);
+    processor.onaudioprocess = (event) => {
+      const input = event.inputBuffer.getChannelData(0);
+      pcmData.push(new Float32Array(input));
     };
 
-    mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(chunks, { type: "audio/mp4" });
+    setTimeout(() => {
+      processor.disconnect();
+      source.disconnect();
+      audioContext.close();
+      stream.getTracks().forEach(track => track.stop());
+
+      // WAV 파일 생성
+      const wavBuffer = encodeWAV(pcmData, audioContext.sampleRate);
+      const audioBlob = new Blob([wavBuffer], { type: "audio/wav" });
 
       if (audioBlob.size < 500) {
-        alert("녹음이 비어 있어요. 다시 시도해주세요.");
+        alert("녹음 데이터가 비어 있어요. 다시 시도해주세요.");
         return;
       }
 
       const formData = new FormData();
-      formData.append("audio", audioBlob, "audio.mp4");
+      formData.append("audio", audioBlob, "audio.wav");
 
-      try {
-        const response = await fetch(WHISPER_API_URL, {
-          method: "POST",
-          body: formData,
-        });
+      // Whisper로 전송
+      fetch(WHISPER_API_URL, {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.text) inputBox.value = data.text;
+          else alert("Whisper 인식 실패. 다시 시도해주세요.");
+        })
+        .catch(() => alert("Whisper 통신 오류가 발생했습니다."));
+    }, 6000);
 
-        const data = await response.json();
-
-        if (data.text) inputBox.value = data.text;
-        else alert("음성 인식 실패. 다시 시도해주세요!");
-      } catch (err) {
-        alert("Whisper 서버 통신 오류입니다.");
-      }
-    };
-
-    mediaRecorder.start();
-    setTimeout(() => mediaRecorder.stop(), 6000);
-    
   } catch (err) {
-    alert("마이크 접근 오류입니다. 권한을 다시 확인해주세요.");
+    alert("마이크 접근 오류입니다. 권한을 확인해주세요.");
   }
+}
+
+// WAV 인코더 함수
+function encodeWAV(pcmData, sampleRate) {
+  const bytesPerSample = 2;
+  const numChannels = 1;
+
+  let totalLength = pcmData.reduce((acc, cur) => acc + cur.length, 0);
+  const buffer = new ArrayBuffer(44 + totalLength * bytesPerSample);
+  const view = new DataView(buffer);
+
+  let offset = 0;
+
+  // WAV 헤더 작성
+  function writeString(str) {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset++, str.charCodeAt(i));
+    }
+  }
+
+  writeString("RIFF");
+  view.setUint32(offset, 36 + totalLength * bytesPerSample, true); offset += 4;
+  writeString("WAVE");
+  writeString("fmt ");
+  view.setUint32(offset, 16, true); offset += 4;
+  view.setUint16(offset, 1, true); offset += 2;
+  view.setUint16(offset, numChannels, true); offset += 2;
+  view.setUint32(offset, sampleRate, true); offset += 4;
+  view.setUint32(offset, sampleRate * numChannels * bytesPerSample, true); offset += 4;
+  view.setUint16(offset, numChannels * bytesPerSample, true); offset += 2;
+  view.setUint16(offset, bytesPerSample * 8, true); offset += 2;
+  writeString("data");
+  view.setUint32(offset, totalLength * bytesPerSample, true); offset += 4;
+
+  // PCM 데이터 작성
+  pcmData.forEach(chunk => {
+    for (let i = 0; i < chunk.length; i++) {
+      const sample = Math.max(-1, Math.min(1, chunk[i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      offset += 2;
+    }
+  });
+
+  return buffer;
 }
 
 
