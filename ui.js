@@ -10,6 +10,13 @@ const WHISPER_API_URL =
 async function startSmartSTT(targetInputId) {
   const inputBox = document.getElementById(targetInputId);
 
+  // 🔽 여기 추가 (상태 표시)
+  const status = document.getElementById("voice-status");
+  if (status) status.innerText = "🎙️ 듣고 있어요… 말씀해 주세요";
+
+  // ↓↓↓ 기존 코드 그대로 이어서 ↓↓↓
+
+
   // 기본 웹 STT 엔진 존재 여부 확인
   window.SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
