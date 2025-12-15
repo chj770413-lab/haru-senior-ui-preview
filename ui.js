@@ -216,6 +216,7 @@ function show(type) {
           <button class="sub-btn" onclick="startSmartSTT('aiInput')">🎤 말하기</button>
           <button class="sub-btn" onclick="sendToAI()">AI에게 보내기</button>
         </div>
+<p id="voice-status" style="margin-top:8px;color:#666;font-size:14px;"></p>
 
         <div id="aiResponse" class="ai-response-box"
           style="margin-top:14px; font-size:17px; line-height:1.4;"></div>
