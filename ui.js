@@ -6,73 +6,50 @@
 const WHISPER_API_URL =
   "https://harudonghaeng-ai-proxy.vercel.app/api/whisper";
 
-/* 음성 → 텍스트 스마트 인식 */
-async function startSmartSTT(targetInputId) {
+/* 음성 → 텍스트 스마트 인식 (분기) */
+function startSmartSTT(targetInputId) {
   const status = document.getElementById("voice-status");
   if (status) status.innerText = "🎙️ 듣고 있어요… 말씀해 주세요";
 
-  // Web Speech API 지원 여부
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (SpeechRecognition) {
-    // 👉 맥북 / 안드로이드(Chrome)
-    startWebSTT(targetInputId);
+    startWebSTT(targetInputId);        // 맥북 / 크롬
   } else {
-    // 👉 아이폰 Safari
-    startWhisperFallback(targetInputId);
-  }
-}
-/* 음성 → 텍스트 스마트 인식 */
-async function startSmartSTT(targetInputId) {
-  const status = document.getElementById("voice-status");
-  if (status) status.innerText = "🎙️ 듣고 있어요… 말씀해 주세요";
-
-  // Web Speech API 지원 여부
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if (SpeechRecognition) {
-    // 👉 맥북 / 안드로이드(Chrome)
-    startWebSTT(targetInputId);
-  } else {
-    // 👉 아이폰 Safari
-    startWhisperFallback(targetInputId);
+    startWhisperFallback(targetInputId); // 아이폰
   }
 }
 
+/* 맥북 / 크롬 Web STT */
+function startWebSTT(targetInputId) {
+  const inputBox = document.getElementById(targetInputId);
+  if (!inputBox) return;
 
+  const recognition = new (window.SpeechRecognition ||
+    window.webkitSpeechRecognition)();
 
-  // ↓↓↓ 기존 코드 그대로 이어서 ↓↓↓
+  recognition.lang = "ko-KR";
 
+  recognition.onresult = (event) => {
+    inputBox.value = event.results[0][0].transcript;
+    const status = document.getElementById("voice-status");
+    if (status) status.innerText = "인식 완료";
+  };
 
-  // 기본 웹 STT 엔진 존재 여부 확인
-  window.SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition.onerror = () => {
+    const status = document.getElementById("voice-status");
+    if (status) status.innerText = "다시 눌러주세요 🙂";
+  };
 
-  if (window.SpeechRecognition) {
-    try {
-      const recognition = new window.SpeechRecognition();
-      recognition.lang = "ko-KR";
+  recognition.onend = () => {
+    const status = document.getElementById("voice-status");
+    if (status) status.innerText = "";
+  };
 
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        inputBox.value = text;
-      };
-
-      recognition.onerror = () => {
-        startWhisperFallback(targetInputId);
-      };
-
-      recognition.start();
-      return;
-    } catch (e) {
-      console.log("웹 STT 오류 → Whisper로 전환");
-    }
-  }
-
-  startWhisperFallback(targetInputId);
+  recognition.start();
 }
+
 
 /* -----------------------------------------------------------
    2) Whisper Fallback (모든 기기 지원)
