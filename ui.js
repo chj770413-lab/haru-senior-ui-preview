@@ -23,6 +23,23 @@ async function startSmartSTT(targetInputId) {
     startWhisperFallback(targetInputId);
   }
 }
+/* 음성 → 텍스트 스마트 인식 */
+async function startSmartSTT(targetInputId) {
+  const status = document.getElementById("voice-status");
+  if (status) status.innerText = "🎙️ 듣고 있어요… 말씀해 주세요";
+
+  // Web Speech API 지원 여부
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+    // 👉 맥북 / 안드로이드(Chrome)
+    startWebSTT(targetInputId);
+  } else {
+    // 👉 아이폰 Safari
+    startWhisperFallback(targetInputId);
+  }
+}
 
 
 
