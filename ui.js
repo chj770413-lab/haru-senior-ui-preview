@@ -6,40 +6,55 @@
 const WHISPER_API_URL =
   "https://harudonghaeng-ai-proxy.vercel.app/api/whisper";
 
-/* 음성 → 텍스트 스마트 인식 (분기) */
+
+  /* ===============================
+   음성 → 텍스트 스마트 인식 (최종)
+   =============================== */
 function startSmartSTT(targetInputId) {
   const status = document.getElementById("voice-status");
   if (status) status.innerText = "🎙️ 듣고 있어요… 말씀해 주세요";
 
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+  // 🔑 iOS Safari 판별 (핵심)
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  if (SpeechRecognition) {
-    startWebSTT(targetInputId);        // 맥북 / 크롬
+  if (isIOS) {
+    // ✅ 아이폰: Whisper (MediaRecorder)
+    startWhisperIOS(targetInputId);
   } else {
-    startWhisperFallback(targetInputId); // 아이폰
+    // ✅ 맥북 / 안드로이드: Web Speech API
+    startWebSTT(targetInputId);
   }
 }
 
-/* 맥북 / 크롬 Web STT */
+/* ===============================
+   맥북 / 안드로이드 (Chrome)
+   Web Speech API
+   =============================== */
 function startWebSTT(targetInputId) {
   const inputBox = document.getElementById(targetInputId);
   if (!inputBox) return;
 
-  const recognition = new (window.SpeechRecognition ||
-    window.webkitSpeechRecognition)();
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  if (!SpeechRecognition) {
+    alert("이 기기에서는 음성 인식이 지원되지 않습니다.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
   recognition.lang = "ko-KR";
 
   recognition.onresult = (event) => {
     inputBox.value = event.results[0][0].transcript;
+
     const status = document.getElementById("voice-status");
-    if (status) status.innerText = "인식 완료";
+    if (status) status.innerText = "인식이 완료되었습니다";
   };
 
   recognition.onerror = () => {
     const status = document.getElementById("voice-status");
-    if (status) status.innerText = "다시 눌러주세요 🙂";
+    if (status) status.innerText = "다시 한 번 눌러주세요 🙂";
   };
 
   recognition.onend = () => {
@@ -48,6 +63,56 @@ function startWebSTT(targetInputId) {
   };
 
   recognition.start();
+}
+
+/* ===============================
+   아이폰 Safari 전용 Whisper
+   =============================== */
+async function startWhisperIOS(targetInputId) {
+  const inputBox = document.getElementById(targetInputId);
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: "audio/mp4" // 🔑 iOS 필수
+    });
+
+    let chunks = [];
+
+    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(chunks, { type: "audio/mp4" });
+
+      if (audioBlob.size < 500) {
+        alert("음성이 인식되지 않았어요. 다시 말씀해 주세요.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "audio.mp4");
+
+      const response = await fetch(WHISPER_API_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.text) inputBox.value = data.text;
+
+      const status = document.getElementById("voice-status");
+      if (status) status.innerText = "";
+    };
+
+    mediaRecorder.start();
+
+    // 시니어 UX 기준 6초
+    setTimeout(() => mediaRecorder.stop(), 6000);
+
+  } catch (err) {
+    alert("아이폰에서 마이크 권한을 허용해주세요.");
+  }
 }
 
 
