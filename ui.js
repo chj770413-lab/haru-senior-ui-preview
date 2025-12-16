@@ -83,29 +83,33 @@ async function startWhisperIOS(targetInputId) {
     mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
     mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(chunks, { type: "audio/mp4" });
+  const audioBlob = new Blob(chunks, { type: "audio/mp4" });
+  chunks = []; // ✅ 여기서 비워야 함
+  stream.getTracks().forEach(track => track.stop()); // ✅ 그 다음 스트림 종료
 
-      if (audioBlob.size < 500) {
-        alert("음성이 인식되지 않았어요. 다시 말씀해 주세요.");
-        return;
-      }
+  if (audioBlob.size < 500) {
+    alert("음성이 인식되지 않았어요. 다시 말씀해 주세요.");
+    return;
+  }
 
-      const formData = new FormData();
-      formData.append("audio", audioBlob, "audio.mp4");
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "audio.mp4");
 
-      const response = await fetch(WHISPER_API_URL, {
-        method: "POST",
-        body: formData,
-      });
+  try {
+    const response = await fetch(WHISPER_API_URL, {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await response.json();
-      if (data.text) inputBox.value = data.text;
+    const data = await response.json();
+    if (data.text) inputBox.value = data.text;
 
-      const status = document.getElementById("voice-status");
-      if (status) status.innerText = "";
-    };
-
-    mediaRecorder.start();
+    const status = document.getElementById("voice-status");
+    if (status) status.innerText = "";
+  } catch (e) {
+    alert("Whisper 통신 오류가 발생했습니다.");
+  }
+};
 
     // 시니어 UX 기준 6초
     setTimeout(() => mediaRecorder.stop(), 6000);
