@@ -10,9 +10,14 @@ const WHISPER_API_URL =
 async function startSmartSTT(targetInputId) {
   const inputBox = document.getElementById(targetInputId);
 
-  // 🔽 여기 추가 (상태 표시)
   const status = document.getElementById("voice-status");
   if (status) status.innerText = "🎙️ 듣고 있어요… 말씀해 주세요";
+
+  // ❌ setTimeout 제거
+  // ✅ 즉시 실행
+  startWhisperFallback(targetInputId);
+}
+
 
   // ↓↓↓ 기존 코드 그대로 이어서 ↓↓↓
 
