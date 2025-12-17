@@ -322,8 +322,10 @@ function finish(msg) {
 }
 
 /* -----------------------------------------------------------
-   5) AI 응답 처리
+   5) AI 응답 처리 (A단계: 직전 질문 1개 기억)
 ----------------------------------------------------------- */
+
+let lastUserMessage = null; // 👈 파일 상단 또는 sendToAI 위에 1번만 선언
 
 async function sendToAI() {
   const text = document.getElementById("aiInput").value.trim();
@@ -338,7 +340,10 @@ async function sendToAI() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          message: text,
+          lastMessage: lastUserMessage, // 👈 직전 질문 전달
+        }),
       }
     );
 
@@ -346,7 +351,11 @@ async function sendToAI() {
     const reply = data.reply || "잠시 후 다시 말씀해주세요.";
 
     resBox.innerHTML = reply;
-    speak(reply);
+    speak(reply); // 🔊 AI 음성 응답
+
+    // 👇 여기서 마지막 질문 저장 (다음 질문용)
+    lastUserMessage = text;
+
   } catch (err) {
     resBox.innerHTML = "⚠️ 연결 오류가 발생했습니다.";
   }
