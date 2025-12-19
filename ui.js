@@ -357,6 +357,7 @@ async function sendToAI() {
     lastUserMessage = text;
 
   } catch (err) {
-    resBox.innerHTML = "⚠️ 연결 오류가 발생했습니다.";
+    resBox.innerHTML = "잠시 응답이 늦어지고 있어요.<br>조금 후에 다시 한 번 말씀해 주세요.";
+}
   }
 }
