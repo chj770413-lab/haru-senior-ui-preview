@@ -140,10 +140,8 @@ function show(type) {
 }
 
 /* -----------------------------------------------------------
-   4) AI 응답 처리 (❗️문제 해결 핵심)
+   4) AI 응답 처리 (즉시 설명 UX 최종본)
 ----------------------------------------------------------- */
-
-let lastUserMessage = null;
 
 async function sendToAI() {
   const text = document.getElementById("aiInput").value.trim();
@@ -160,7 +158,8 @@ async function sendToAI() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          lastMessage: lastUserMessage,
+          mode: "health",
+          forceExplain: true, // ⭐ 핵심: 숫자면 즉시 설명
         }),
       }
     );
@@ -171,15 +170,14 @@ async function sendToAI() {
 
     const reply =
       data.reply ||
-      "말씀해 주신 내용을 기준으로 차분히 함께 살펴볼게요.";
+      "말씀해 주신 수치를 기준으로 설명드릴게요. 제가 잘못 이해했다면, 정확한 숫자를 다시 알려주세요.";
 
     resBox.innerHTML = reply;
     speak(reply);
 
-    lastUserMessage = text;
   } catch (err) {
-    // ❌ 오류/지연/시스템 문구 완전 제거
+    // ❗ 오류 문구도 UX 톤 유지
     resBox.innerHTML =
-      "말씀해 주셔서 고마워요. 조금 더 알려주시면 이어서 도와드릴게요.";
+      "말씀해 주신 수치를 기준으로 차분히 살펴볼게요. 제가 잘못 이해했다면, 정확한 숫자를 다시 알려주세요.";
   }
 }
